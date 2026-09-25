@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin sign in — EcoMates</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body class="admin-page">
+  <header class="topbar"><a class="brand" href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='brand.jpeg') }}" alt="EcoMates"><span>EcoMates</span></a><nav><a class="nav-link" href="{{ url_for('index') }}">← Back to shop</a></nav></header>
+  <main class="login-main">
+    <section class="login-panel">
+      <div class="login-mark"><img src="{{ url_for('static', filename='brand.jpeg') }}" alt=""></div>
+      <div class="eyebrow">GOOD TO SEE YOU</div><h1>Admin <em>sign in.</em></h1><p>Sign in to manage your EcoMates collection.</p>
+      {% with messages = get_flashed_messages(with_categories=true) %}{% if messages %}<div class="flash-list">{% for category, message in messages %}<div class="flash {{ category }}">{{ message }}</div>{% endfor %}</div>{% endif %}{% endwith %}
+      <form method="post" class="login-form">
+        <label for="username">Username</label><input id="username" name="username" type="text" autocomplete="username" required autofocus>
+        <label for="password">Password</label><input id="password" name="password" type="password" autocomplete="current-password" required>
+        <button class="button button-dark" type="submit">Sign in <span>↗</span></button>
+      </form>
+    </section>
+  </main>
+  <footer><a class="brand" href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='brand.jpeg') }}" alt=""><span>EcoMates</span></a><span>A little more love for the planet. <b>© 2026 EcoMates</b></span></footer>
+</body>
+</html>

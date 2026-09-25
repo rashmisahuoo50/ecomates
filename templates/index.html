@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f7ee">
+  <title>EcoMates — Little swaps, lighter footprint</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='brand.jpeg') }}" alt="EcoMates"><span>EcoMates</span></a>
+    <nav><a class="nav-link active" href="{{ url_for('index') }}">Shop</a><a class="nav-link" href="#story">Our story</a><a class="admin-link" href="{{ url_for('admin') }}">Admin <span>↗</span></a></nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy"><div class="eyebrow"><span class="sparkle">✳</span> GOOD THINGS, GENTLY MADE</div>
+        <h1>Small swaps.<br><span>Big love</span> for our planet.</h1>
+        <p>Thoughtful everyday essentials that make a lighter footprint feel like second nature.</p>
+        <a class="button button-dark" href="#collection">Explore the collection <span>↓</span></a>
+        <div class="hero-note"><div class="avatar-stack"><i>🌿</i><i>☀️</i><i>🌼</i></div><span>Made for mindful everyday living</span></div>
+      </div>
+      <div class="hero-art"><div class="sun"></div><div class="art-label">A LITTLE MORE<br>EARTH-FRIENDLY <span>✳</span></div><div class="leaf leaf-one">✦</div><div class="leaf leaf-two">✦</div>
+        <div class="hero-image"><img src="{{ url_for('static', filename='brand.jpeg') }}" alt="EcoMates earth and leaf illustration"></div><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div>
+        <div class="floating-tag"><span>🌱</span> Better by nature</div>
+      </div>
+    </section>
+
+    <section class="benefits"><div><span class="benefit-icon">♧</span><span><b>Kind to the planet</b><small>Good choices, every day</small></span></div><div><span class="benefit-icon">✳</span><span><b>Made to be loved</b><small>Thoughtful, lasting quality</small></span></div><div><span class="benefit-icon">♡</span><span><b>Small batch goodness</b><small>Picked with care</small></span></div></section>
+
+    <section class="collection" id="collection">
+      <div class="section-heading"><div><div class="eyebrow">THE GOOD STUFF</div><h2>Little things, <em>better.</em></h2></div><span class="item-count">{{ products|length }} thoughtful find{% if products|length != 1 %}s{% endif %}</span></div>
+      {% if products %}
+      <div class="product-grid">
+        {% for product in products %}
+        <article class="product-card">
+          <div class="product-image"><img src="{{ url_for('static', filename='uploads/' + product.image) }}" alt="{{ product.name }}"><span class="product-badge">A GOOD CHOICE</span><button class="heart" aria-label="Save {{ product.name }}">♡</button></div>
+          <div class="product-info"><div class="product-title"><h3>{{ product.name }}</h3><span class="stock"><i></i>{{ product.count }} in stock</span></div><p>{{ product.description }}</p><div class="product-foot"><span class="made-note">✳ Made mindfully</span><button class="arrow-button" aria-label="View {{ product.name }}">↗</button></div></div>
+        </article>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="empty-state"><div class="empty-illustration">🌱</div><h3>Good things are growing.</h3><p>Our collection is getting ready. Pop into the admin page to add your first find.</p><a href="{{ url_for('admin') }}" class="button button-dark">Add a product <span>↗</span></a></div>
+      {% endif %}
+    </section>
+
+    <section class="story" id="story"><div class="story-stamp">GOOD<br>FOR YOU<br><span>✳</span><br>GOOD FOR<br>EARTH</div><div><div class="eyebrow">A LITTLE ABOUT US</div><h2>Better habits<br>start <em>somewhere.</em></h2><p>We believe the small things add up. EcoMates brings together everyday essentials that help you make more thoughtful choices, one little swap at a time.</p></div><div class="story-leaves">✿<span>✦</span></div></section>
+  </main>
+  <footer><a class="brand" href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='brand.jpeg') }}" alt=""><span>EcoMates</span></a><span>Made with a little more love for the planet. <b>© 2026 EcoMates</b></span></footer>
+</body>
+</html>
