@@ -1,0 +1,121 @@
+{
+  "products": [
+    {
+      "id": 1,
+      "imagePath": "images/products/headband-crochet.jpg",
+      "title": "Crochet Headband",
+      "description": "Soft, handmade crochet headband that's comfortable for daily wear and adds a cozy touch to any outfit.",
+      "itemsInStock": 8,
+      "pricePerItem": 99.0,
+      "currency": "INR"
+    },
+    {
+      "id": 2,
+      "imagePath": "images/products/hairclips-crochet.jpg",
+      "title": "Crochet Hair Clips",
+      "description": "Cute handmade crochet hair clips in bright colours, perfect for kids and adults alike.",
+      "itemsInStock": 8,
+      "pricePerItem": 40,
+      "currency": "INR"
+    },
+    {
+      "id": 3,
+      "imagePath": "images/products/seed-pen.jpg",
+      "title": "Seed Pen",
+      "description": "Eco-friendly paper pen with a plantable seed at the end. Use it, then plant it and watch it grow.",
+      "itemsInStock": 20,
+      "pricePerItem": 30,
+      "currency": "INR"
+    },
+    {
+      "id": 4,
+      "imagePath": "images/products/seed-pencil.jpg",
+      "title": "Seed Pencil",
+      "description": "Plantable pencil with seeds in the cap. A zero-waste stationery choice for school and office.",
+      "itemsInStock": 20,
+      "pricePerItem": 20,
+      "currency": "INR"
+    },
+    {
+      "id": 5,
+      "imagePath": "images/products/big-mandala.jpg",
+      "title": "Big Mandala Art",
+      "description": "Large hand-drawn mandala artwork with intricate detailing, ideal as a centrepiece for living rooms.",
+      "itemsInStock": 3,
+      "pricePerItem": 50,
+      "currency": "INR"
+    },
+    {
+      "id": 6,
+      "imagePath": "images/products/small-mandala.jpg",
+      "title": "Small Mandala Art",
+      "description": "Compact hand-drawn mandala piece, great for desks, shelves, or gifting.",
+      "itemsInStock": 8,
+      "pricePerItem": 40,
+      "currency": "INR"
+    },
+    {
+      "id": 7,
+      "imagePath": "images/products/bookmarks.jpg",
+      "title": "Handmade Bookmarks",
+      "description": "Hand-painted bookmarks in assorted designs, a thoughtful gift for book lovers.",
+      "itemsInStock": 30,
+      "pricePerItem": 49,
+      "currency": "INR"
+    },
+    {
+      "id": 8,
+      "imagePath": "images/products/diwali-hanging.jpg",
+      "title": "Diwali Hanging",
+      "description": "Festive handmade door and wall hanging to brighten your home this Diwali.",
+      "itemsInStock": 1,
+      "pricePerItem": 100,
+      "currency": "INR"
+    },
+    {
+      "id": 9,
+      "imagePath": "images/products/circle-hanging.jpg",
+      "title": "Circle Wall Hanging",
+      "description": "Round decorative wall hanging that adds a handcrafted charm to any room.",
+      "itemsInStock": 3,
+      "pricePerItem": 150,
+      "currency": "INR"
+    },
+    {
+      "id": 10,
+      "imagePath": "images/products/painting.jpg",
+      "title": "Painting",
+      "description": "Original hand-painted artwork in a standard size, perfect for home or office walls.",
+      "itemsInStock": 6,
+      "pricePerItem": 599,
+      "currency": "INR"
+    },
+    {
+      "id": 11,
+      "imagePath": "images/products/big-painting.jpg",
+      "title": "Big Painting",
+      "description": "Large original hand-painted canvas that makes a bold statement on any feature wall.",
+      "itemsInStock": 1,
+      "pricePerItem": 1199,
+      "currency": "INR"
+    },
+    {
+      "id": 12,
+      "imagePath": "images/products/marble-pouch.jpg",
+      "title": "Marble Pouch",
+      "description": "Stylish pouch with a marble-effect finish for coins, cosmetics, or small essentials.",
+      "itemsInStock": 8,
+      "pricePerItem": 50,
+      "currency": "INR"
+    },
+    {
+      "id": 13,
+      "imagePath": "images/products/cloth-pouch.jpg",
+      "title": "Cloth Pouch",
+      "description": "Reusable handmade fabric pouch, a sturdy and eco-friendly way to carry everyday items.",
+      "itemsInStock": 8,
+      "pricePerItem": 130,
+      "currency": "INR"
+    }
+  ]
+}

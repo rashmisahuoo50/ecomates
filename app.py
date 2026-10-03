@@ -2,10 +2,10 @@ from pathlib import Path
 from functools import wraps
 from decimal import Decimal, InvalidOperation
 import hmac
+import json
 import os
 import secrets
 import shutil
-import sqlite3
 import uuid
 
 from flask import Flask, flash, redirect, render_template, request, send_from_directory, session, url_for
@@ -39,12 +39,9 @@ if DATA_DIR_SETTING:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
     UPLOAD_DIR = DATA_DIR / "uploads"
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-    DB_PATH = DATA_DIR / "ecomates.db"
-
-    # Seed a new persistent disk from files already present in the deployed project.
-    legacy_db = BASE_DIR / "ecomates.db"
-    if not DB_PATH.exists() and legacy_db.exists():
-        shutil.copy2(legacy_db, DB_PATH)
+    PRODUCTS_PATH = DATA_DIR / "products.json"
+    if not PRODUCTS_PATH.exists():
+        shutil.copy2(BASE_DIR / "products.json", PRODUCTS_PATH)
     legacy_uploads = BASE_DIR / "static" / "uploads"
     if legacy_uploads.is_dir():
         for old_image in legacy_uploads.iterdir():
@@ -55,7 +52,7 @@ else:
     # Keep local development data in the existing project folders.
     UPLOAD_DIR = BASE_DIR / "static" / "uploads"
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-    DB_PATH = BASE_DIR / "ecomates.db"
+    PRODUCTS_PATH = BASE_DIR / "products.json"
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp", "gif"}
 
 app = Flask(__name__)
@@ -75,26 +72,29 @@ def admin_required(view):
     return wrapped_view
 
 
-def connect_db():
-    db = sqlite3.connect(DB_PATH)
-    db.row_factory = sqlite3.Row
-    return db
+def read_catalog():
+    return json.loads(PRODUCTS_PATH.read_text(encoding="utf-8"))
 
 
-def init_db():
-    with connect_db() as db:
-        db.execute("""CREATE TABLE IF NOT EXISTS products (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            description TEXT NOT NULL,
-            count INTEGER NOT NULL DEFAULT 0,
-            price REAL NOT NULL DEFAULT 0,
-            image TEXT NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )""")
-        columns = {row[1] for row in db.execute("PRAGMA table_info(products)")}
-        if "price" not in columns:
-            db.execute("ALTER TABLE products ADD COLUMN price REAL NOT NULL DEFAULT 0")
+def write_catalog(catalog):
+    temporary_path = PRODUCTS_PATH.with_suffix(".json.tmp")
+    temporary_path.write_text(json.dumps(catalog, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    temporary_path.replace(PRODUCTS_PATH)
+
+
+def display_products(catalog):
+    return [
+        {
+            "id": item["id"],
+            "image": item["imagePath"],
+            "name": item["title"],
+            "description": item["description"],
+            "count": item["itemsInStock"],
+            "price": item["pricePerItem"],
+            "currency": item.get("currency", "INR"),
+        }
+        for item in catalog.get("products", [])
+    ]
 
 
 def allowed_file(filename):
@@ -103,13 +103,20 @@ def allowed_file(filename):
 
 @app.get("/")
 def index():
-    with connect_db() as db:
-        products = db.execute("SELECT * FROM products ORDER BY created_at DESC, id DESC").fetchall()
-    return render_template("index.html", products=products)
+    return render_template("index.html", products=display_products(read_catalog()))
 
 
 @app.get("/uploads/<path:filename>")
 def uploaded_file(filename):
+    return send_from_directory(UPLOAD_DIR, filename)
+
+
+@app.get("/catalog-assets/<path:filename>")
+def catalog_asset(filename):
+    if filename.startswith("images/products/"):
+        return send_from_directory(BASE_DIR, filename)
+    if filename.startswith("uploads/"):
+        filename = filename.removeprefix("uploads/")
     return send_from_directory(UPLOAD_DIR, filename)
 
 
@@ -170,30 +177,39 @@ def admin():
             suffix = Path(secure_filename(image.filename)).suffix.lower()
             filename = f"{uuid.uuid4().hex}{suffix}"
             image.save(UPLOAD_DIR / filename)
-            with connect_db() as db:
-                db.execute(
-                    "INSERT INTO products (name, description, count, price, image) VALUES (?, ?, ?, ?, ?)",
-                    (name, description, count, float(price), filename),
-                )
+            catalog = read_catalog()
+            next_id = max((int(item.get("id", 0)) for item in catalog.get("products", [])), default=0) + 1
+            catalog.setdefault("products", []).append({
+                "id": next_id,
+                "imagePath": f"uploads/{filename}",
+                "title": name,
+                "description": description,
+                "itemsInStock": count,
+                "pricePerItem": float(price),
+                "currency": "INR",
+            })
+            write_catalog(catalog)
             flash(f"{name} has been added to the collection.", "success")
             return redirect(url_for("admin"))
 
-    with connect_db() as db:
-        products = db.execute("SELECT * FROM products ORDER BY created_at DESC, id DESC").fetchall()
-    return render_template("admin.html", products=products)
+    return render_template("admin.html", products=display_products(read_catalog()))
 
 
 @app.post("/admin/delete/<int:product_id>")
 @admin_required
 def delete_product(product_id):
-    with connect_db() as db:
-        product = db.execute("SELECT image FROM products WHERE id = ?", (product_id,)).fetchone()
-        if product:
-            db.execute("DELETE FROM products WHERE id = ?", (product_id,))
-            image_path = UPLOAD_DIR / product["image"]
-            if image_path.exists():
-                image_path.unlink()
-            flash("Product removed.", "success")
+    catalog = read_catalog()
+    products = catalog.get("products", [])
+    product = next((item for item in products if int(item.get("id", -1)) == product_id), None)
+    if product:
+        products.remove(product)
+        write_catalog(catalog)
+        image_path = product.get("imagePath", "")
+        if image_path.startswith("uploads/"):
+            uploaded_image = UPLOAD_DIR / Path(image_path).name
+            if uploaded_image.exists():
+                uploaded_image.unlink()
+        flash("Product removed.", "success")
     return redirect(url_for("admin"))
 
 
@@ -219,31 +235,34 @@ def edit_product(product_id):
         flash("Choose a PNG, JPG, JPEG, WEBP, or GIF product image.", "error")
         return redirect(url_for("admin"))
 
-    with connect_db() as db:
-        product = db.execute("SELECT image FROM products WHERE id = ?", (product_id,)).fetchone()
-        if not product:
-            flash("That product could not be found.", "error")
-            return redirect(url_for("admin"))
+    catalog = read_catalog()
+    product = next((item for item in catalog.get("products", []) if int(item.get("id", -1)) == product_id), None)
+    if not product:
+        flash("That product could not be found.", "error")
+        return redirect(url_for("admin"))
 
-        filename = product["image"]
-        if image and image.filename:
-            suffix = Path(secure_filename(image.filename)).suffix.lower()
-            new_filename = f"{uuid.uuid4().hex}{suffix}"
-            image.save(UPLOAD_DIR / new_filename)
-            old_image_path = UPLOAD_DIR / filename
-            if old_image_path.exists():
-                old_image_path.unlink()
-            filename = new_filename
+    old_image_path = product.get("imagePath", "")
+    if image and image.filename:
+        suffix = Path(secure_filename(image.filename)).suffix.lower()
+        new_filename = f"{uuid.uuid4().hex}{suffix}"
+        image.save(UPLOAD_DIR / new_filename)
+        product["imagePath"] = f"uploads/{new_filename}"
+        if old_image_path.startswith("uploads/"):
+            previous_image = UPLOAD_DIR / Path(old_image_path).name
+            if previous_image.exists():
+                previous_image.unlink()
 
-        db.execute(
-            "UPDATE products SET name = ?, description = ?, count = ?, price = ?, image = ? WHERE id = ?",
-            (name, description, count, float(price), filename, product_id),
-        )
+    product.update({
+        "title": name,
+        "description": description,
+        "itemsInStock": count,
+        "pricePerItem": float(price),
+        "currency": product.get("currency", "INR"),
+    })
+    write_catalog(catalog)
     flash(f"{name} has been updated.", "success")
     return redirect(url_for("admin"))
 
-
-init_db()
 
 if __name__ == "__main__":
     app.run(debug=True)
