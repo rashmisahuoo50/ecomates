@@ -38,7 +38,7 @@
       <div class="product-grid">
         {% for product in products %}
         <article class="product-card">
-          <div class="product-image"><img src="{{ url_for('static', filename='uploads/' + product.image) }}" alt="{{ product.name }}"><span class="product-badge">A GOOD CHOICE</span><button class="heart" aria-label="Save {{ product.name }}">♡</button></div>
+          <div class="product-image"><img src="{{ url_for('uploaded_file', filename=product.image) }}" alt="{{ product.name }}"><span class="product-badge">A GOOD CHOICE</span><button class="heart" aria-label="Save {{ product.name }}">♡</button></div>
           <div class="product-info"><div class="product-title"><h3>{{ product.name }}</h3><span class="stock"><i></i>{{ product.count }} in stock</span></div><p>{{ product.description }}</p><div class="product-foot"><span class="product-price">₹{{ '%.2f'|format(product.price) }} <small>per item</small></span><span class="made-note">✳ Mindfully made</span></div></div>
         </article>
         {% endfor %}

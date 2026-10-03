@@ -4,10 +4,11 @@ from decimal import Decimal, InvalidOperation
 import hmac
 import os
 import secrets
+import shutil
 import sqlite3
 import uuid
 
-from flask import Flask, flash, redirect, render_template, request, session, url_for
+from flask import Flask, flash, redirect, render_template, request, send_from_directory, session, url_for
 from werkzeug.utils import secure_filename
 
 
@@ -32,9 +33,29 @@ def load_local_env():
 
 load_local_env()
 
-UPLOAD_DIR = BASE_DIR / "static" / "uploads"
-UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
-DB_PATH = BASE_DIR / "ecomates.db"
+DATA_DIR_SETTING = os.environ.get("ECOMATES_DATA_DIR")
+if DATA_DIR_SETTING:
+    DATA_DIR = Path(DATA_DIR_SETTING).expanduser()
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
+    UPLOAD_DIR = DATA_DIR / "uploads"
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    DB_PATH = DATA_DIR / "ecomates.db"
+
+    # Seed a new persistent disk from files already present in the deployed project.
+    legacy_db = BASE_DIR / "ecomates.db"
+    if not DB_PATH.exists() and legacy_db.exists():
+        shutil.copy2(legacy_db, DB_PATH)
+    legacy_uploads = BASE_DIR / "static" / "uploads"
+    if legacy_uploads.is_dir():
+        for old_image in legacy_uploads.iterdir():
+            new_image = UPLOAD_DIR / old_image.name
+            if old_image.is_file() and not new_image.exists():
+                shutil.copy2(old_image, new_image)
+else:
+    # Keep local development data in the existing project folders.
+    UPLOAD_DIR = BASE_DIR / "static" / "uploads"
+    UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
+    DB_PATH = BASE_DIR / "ecomates.db"
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp", "gif"}
 
 app = Flask(__name__)
@@ -85,6 +106,11 @@ def index():
     with connect_db() as db:
         products = db.execute("SELECT * FROM products ORDER BY created_at DESC, id DESC").fetchall()
     return render_template("index.html", products=products)
+
+
+@app.get("/uploads/<path:filename>")
+def uploaded_file(filename):
+    return send_from_directory(UPLOAD_DIR, filename)
 
 
 @app.route("/admin/login", methods=["GET", "POST"])
