@@ -38,8 +38,10 @@
       <div class="product-grid">
         {% for product in products %}
         <article class="product-card">
-          <div class="product-image"><img src="{{ url_for('uploaded_file', filename=product.image) }}" alt="{{ product.name }}"><span class="product-badge">A GOOD CHOICE</span><button class="heart" aria-label="Save {{ product.name }}">♡</button></div>
-          <div class="product-info"><div class="product-title"><h3>{{ product.name }}</h3><span class="stock"><i></i>{{ product.count }} in stock</span></div><p>{{ product.description }}</p><div class="product-foot"><span class="product-price">₹{{ '%.2f'|format(product.price) }} <small>per item</small></span><span class="made-note">✳ Mindfully made</span></div></div>
+          <button type="button" class="product-open" data-name="{{ product.name }}" data-description="{{ product.description }}" data-price="{{ '%.2f'|format(product.price) }}" data-count="{{ product.count }}" data-image="{{ url_for('uploaded_file', filename=product.image) }}" aria-label="View {{ product.name }} details">
+            <div class="product-image"><img src="{{ url_for('uploaded_file', filename=product.image) }}" alt="{{ product.name }}"></div>
+            <div class="product-info"><div class="product-title"><h3>{{ product.name }}</h3><span class="stock"><i></i>{{ product.count }} in stock</span></div><p>{{ product.description }}</p><div class="product-foot"><span class="product-price">₹{{ '%.2f'|format(product.price) }} <small>per item</small></span><span class="made-note">✳ View details ↗</span></div></div>
+          </button>
         </article>
         {% endfor %}
       </div>
@@ -50,6 +52,22 @@
 
     <section class="story" id="story"><div class="story-stamp">GOOD<br>FOR YOU<br><span>✳</span><br>GOOD FOR<br>EARTH</div><div><div class="eyebrow">A LITTLE ABOUT US</div><h2>Better habits<br>start <em>somewhere.</em></h2><p>We believe the small things add up. EcoMates brings together everyday essentials that help you make more thoughtful choices, one little swap at a time.</p></div><div class="story-leaves">✿<span>✦</span></div></section>
   </main>
+  <dialog class="product-dialog" id="product-dialog" aria-labelledby="detail-name"><div class="product-dialog-content"><button type="button" class="product-dialog-close" aria-label="Close product details">×</button><img class="product-dialog-image" id="detail-image" alt=""><div class="product-dialog-info"><div class="eyebrow">A THOUGHTFUL FIND</div><h2 id="detail-name"></h2><p id="detail-description"></p><div class="detail-price" id="detail-price"></div><div class="detail-stock" id="detail-stock"></div></div></div></dialog>
   <footer><a class="brand" href="{{ url_for('index') }}"><img src="{{ url_for('static', filename='brand.jpeg') }}" alt=""><span>EcoMates</span></a><span>Made with a little more love for the planet. <b>© 2026 EcoMates</b></span></footer>
+  <script>
+    const productDialog = document.getElementById('product-dialog');
+    document.querySelectorAll('.product-open').forEach(card => card.addEventListener('click', () => {
+      document.getElementById('detail-image').src = card.dataset.image;
+      document.getElementById('detail-image').alt = card.dataset.name;
+      document.getElementById('detail-name').textContent = card.dataset.name;
+      document.getElementById('detail-description').textContent = card.dataset.description;
+      document.getElementById('detail-price').textContent = `₹${card.dataset.price} per item`;
+      const count = Number(card.dataset.count);
+      document.getElementById('detail-stock').textContent = `${count} ${count === 1 ? 'item' : 'items'} in stock`;
+      productDialog.showModal();
+    }));
+    productDialog.querySelector('.product-dialog-close').addEventListener('click', () => productDialog.close());
+    productDialog.addEventListener('click', event => { if (event.target === productDialog) productDialog.close(); });
+  </script>
 </body>
 </html>
