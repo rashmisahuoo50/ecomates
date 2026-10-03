@@ -1,0 +1,6 @@
+.env
+ecomates.db
+static/uploads/*
+!static/uploads/.gitkeep
+__pycache__/
+*.py[cod]

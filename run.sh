@@ -3,6 +3,12 @@ set -e
 
 cd "$(dirname "$0")"
 
+if [ -f .env ]; then
+  set -a
+  . ./.env
+  set +a
+fi
+
 if [ -z "${ECOMATES_ADMIN_USERNAME:-}" ]; then
   ECOMATES_ADMIN_USERNAME=admin
   export ECOMATES_ADMIN_USERNAME

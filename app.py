@@ -1,5 +1,6 @@
 from pathlib import Path
 from functools import wraps
+from decimal import Decimal, InvalidOperation
 import hmac
 import os
 import secrets
@@ -11,6 +12,26 @@ from werkzeug.utils import secure_filename
 
 
 BASE_DIR = Path(__file__).resolve().parent
+
+
+def load_local_env():
+    env_file = BASE_DIR / ".env"
+    if not env_file.is_file():
+        return
+    for line in env_file.read_text(encoding="utf-8").splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key, value = key.strip(), value.strip()
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in "\"'":
+            value = value[1:-1]
+        if key:
+            os.environ.setdefault(key, value)
+
+
+load_local_env()
+
 UPLOAD_DIR = BASE_DIR / "static" / "uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 DB_PATH = BASE_DIR / "ecomates.db"
@@ -46,9 +67,13 @@ def init_db():
             name TEXT NOT NULL,
             description TEXT NOT NULL,
             count INTEGER NOT NULL DEFAULT 0,
+            price REAL NOT NULL DEFAULT 0,
             image TEXT NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )""")
+        columns = {row[1] for row in db.execute("PRAGMA table_info(products)")}
+        if "price" not in columns:
+            db.execute("ALTER TABLE products ADD COLUMN price REAL NOT NULL DEFAULT 0")
 
 
 def allowed_file(filename):
@@ -105,10 +130,14 @@ def admin():
             count = int(request.form.get("count", "0"))
         except ValueError:
             count = -1
+        try:
+            price = Decimal(request.form.get("price", ""))
+        except InvalidOperation:
+            price = Decimal("-1")
         image = request.files.get("image")
 
-        if not name or not description or count < 0:
-            flash("Add a product name, description, and a count of zero or more.", "error")
+        if not name or not description or count < 0 or not price.is_finite() or price < 0:
+            flash("Add a product name, description, valid price, and a count of zero or more.", "error")
         elif not image or not image.filename or not allowed_file(image.filename):
             flash("Choose a PNG, JPG, JPEG, WEBP, or GIF product image.", "error")
         else:
@@ -117,8 +146,8 @@ def admin():
             image.save(UPLOAD_DIR / filename)
             with connect_db() as db:
                 db.execute(
-                    "INSERT INTO products (name, description, count, image) VALUES (?, ?, ?, ?)",
-                    (name, description, count, filename),
+                    "INSERT INTO products (name, description, count, price, image) VALUES (?, ?, ?, ?, ?)",
+                    (name, description, count, float(price), filename),
                 )
             flash(f"{name} has been added to the collection.", "success")
             return redirect(url_for("admin"))
@@ -151,10 +180,14 @@ def edit_product(product_id):
         count = int(request.form.get("count", "0"))
     except ValueError:
         count = -1
+    try:
+        price = Decimal(request.form.get("price", ""))
+    except InvalidOperation:
+        price = Decimal("-1")
     image = request.files.get("image")
 
-    if not name or not description or count < 0:
-        flash("Add a product name, description, and a count of zero or more.", "error")
+    if not name or not description or count < 0 or not price.is_finite() or price < 0:
+        flash("Add a product name, description, valid price, and a count of zero or more.", "error")
         return redirect(url_for("admin"))
     if image and image.filename and not allowed_file(image.filename):
         flash("Choose a PNG, JPG, JPEG, WEBP, or GIF product image.", "error")
@@ -177,8 +210,8 @@ def edit_product(product_id):
             filename = new_filename
 
         db.execute(
-            "UPDATE products SET name = ?, description = ?, count = ?, image = ? WHERE id = ?",
-            (name, description, count, filename, product_id),
+            "UPDATE products SET name = ?, description = ?, count = ?, price = ?, image = ? WHERE id = ?",
+            (name, description, count, float(price), filename, product_id),
         )
     flash(f"{name} has been updated.", "success")
     return redirect(url_for("admin"))
