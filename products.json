@@ -56,7 +56,7 @@
     },
     {
       "id": 7,
-      "imagePath": "images/products/wood-bookmarks.jpg",
+      "imagePath": "images/products/bookmarks.jpg",
       "title": "Handmade Bookmarks",
       "description": "Hand-painted bookmarks in assorted designs, a thoughtful gift for book lovers.",
       "itemsInStock": 30,
@@ -83,7 +83,7 @@
     },
     {
       "id": 10,
-      "imagePath": "images/products/small-painting.jpg",
+      "imagePath": "images/products/painting.jpg",
       "title": "Painting",
       "description": "Original hand-painted artwork in a standard size, perfect for home or office walls.",
       "itemsInStock": 6,
