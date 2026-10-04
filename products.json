@@ -6,7 +6,7 @@
       "title": "Crochet Headband",
       "description": "Soft, handmade crochet headband that's comfortable for daily wear and adds a cozy touch to any outfit.",
       "itemsInStock": 8,
-      "pricePerItem": 99.0,
+      "pricePerItem": 100.0,
       "currency": "INR"
     },
     {
@@ -15,7 +15,7 @@
       "title": "Crochet Hair Clips",
       "description": "Cute handmade crochet hair clips in bright colours, perfect for kids and adults alike.",
       "itemsInStock": 8,
-      "pricePerItem": 40,
+      "pricePerItem": 20,
       "currency": "INR"
     },
     {
@@ -23,7 +23,7 @@
       "imagePath": "images/products/seed-pen.jpg",
       "title": "Seed Pen",
       "description": "Eco-friendly paper pen with a plantable seed at the end. Use it, then plant it and watch it grow.",
-      "itemsInStock": 20,
+      "itemsInStock": 25,
       "pricePerItem": 30,
       "currency": "INR"
     },
@@ -50,17 +50,17 @@
       "imagePath": "images/products/small-mandala.jpg",
       "title": "Small Mandala Art",
       "description": "Compact hand-drawn mandala piece, great for desks, shelves, or gifting.",
-      "itemsInStock": 8,
+      "itemsInStock": 4,
       "pricePerItem": 40,
       "currency": "INR"
     },
     {
       "id": 7,
-      "imagePath": "images/products/bookmarks.jpg",
+      "imagePath": "images/products/wood-bookmarks.jpg",
       "title": "Handmade Bookmarks",
       "description": "Hand-painted bookmarks in assorted designs, a thoughtful gift for book lovers.",
       "itemsInStock": 30,
-      "pricePerItem": 49,
+      "pricePerItem": 50,
       "currency": "INR"
     },
     {
@@ -83,11 +83,11 @@
     },
     {
       "id": 10,
-      "imagePath": "images/products/painting.jpg",
+      "imagePath": "images/products/small-painting.jpg",
       "title": "Painting",
       "description": "Original hand-painted artwork in a standard size, perfect for home or office walls.",
       "itemsInStock": 6,
-      "pricePerItem": 599,
+      "pricePerItem": 500,
       "currency": "INR"
     },
     {
@@ -96,7 +96,7 @@
       "title": "Big Painting",
       "description": "Large original hand-painted canvas that makes a bold statement on any feature wall.",
       "itemsInStock": 1,
-      "pricePerItem": 1199,
+      "pricePerItem": 700,
       "currency": "INR"
     },
     {
@@ -113,13 +113,13 @@
       "imagePath": "images/products/cloth-pouch.jpg",
       "title": "Cloth Pouch",
       "description": "Reusable handmade fabric pouch, a sturdy and eco-friendly way to carry everyday items.",
-      "itemsInStock": 8,
-      "pricePerItem": 130,
+      "itemsInStock": 12,
+      "pricePerItem": 120,
       "currency": "INR"
     },
     {
       "id": 14,
-      "imagePath": "images/products/uploads/admin-60e311d9e4ff489fa8216aa88f5e2cca.jpeg",
+      "imagePath": "images/products/flower-hair-clip.jpeg",
       "title": "Crochet Clips flower",
       "description": "Handmade crochet hairclips",
       "itemsInStock": 12,
