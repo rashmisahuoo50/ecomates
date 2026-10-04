@@ -53,6 +53,12 @@ else:
     UPLOAD_DIR = BASE_DIR / "static" / "uploads"
     UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
     PRODUCTS_PATH = BASE_DIR / "products.json"
+PRODUCT_IMAGES_DIR = BASE_DIR / "images" / "products"
+if DATA_DIR_SETTING:
+    PRODUCT_UPLOADS_DIR = DATA_DIR / "images" / "products" / "uploads"
+else:
+    PRODUCT_UPLOADS_DIR = PRODUCT_IMAGES_DIR / "uploads"
+PRODUCT_UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "webp", "gif"}
 
 app = Flask(__name__)
@@ -101,6 +107,17 @@ def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def remove_uploaded_product_image(image_path):
+    if image_path.startswith("images/products/uploads/admin-"):
+        image_file = PRODUCT_UPLOADS_DIR / Path(image_path).name
+    elif image_path.startswith("uploads/"):
+        image_file = UPLOAD_DIR / Path(image_path).name
+    else:
+        return
+    if image_file.exists():
+        image_file.unlink()
+
+
 @app.get("/")
 def index():
     return render_template("index.html", products=display_products(read_catalog()))
@@ -113,6 +130,8 @@ def uploaded_file(filename):
 
 @app.get("/catalog-assets/<path:filename>")
 def catalog_asset(filename):
+    if filename.startswith("images/products/uploads/"):
+        return send_from_directory(PRODUCT_UPLOADS_DIR, Path(filename).name)
     if filename.startswith("images/products/"):
         return send_from_directory(BASE_DIR, filename)
     if filename.startswith("uploads/"):
@@ -175,13 +194,13 @@ def admin():
             flash("Choose a PNG, JPG, JPEG, WEBP, or GIF product image.", "error")
         else:
             suffix = Path(secure_filename(image.filename)).suffix.lower()
-            filename = f"{uuid.uuid4().hex}{suffix}"
-            image.save(UPLOAD_DIR / filename)
+            filename = f"admin-{uuid.uuid4().hex}{suffix}"
+            image.save(PRODUCT_UPLOADS_DIR / filename)
             catalog = read_catalog()
             next_id = max((int(item.get("id", 0)) for item in catalog.get("products", [])), default=0) + 1
             catalog.setdefault("products", []).append({
                 "id": next_id,
-                "imagePath": f"uploads/{filename}",
+                "imagePath": f"images/products/uploads/{filename}",
                 "title": name,
                 "description": description,
                 "itemsInStock": count,
@@ -204,11 +223,7 @@ def delete_product(product_id):
     if product:
         products.remove(product)
         write_catalog(catalog)
-        image_path = product.get("imagePath", "")
-        if image_path.startswith("uploads/"):
-            uploaded_image = UPLOAD_DIR / Path(image_path).name
-            if uploaded_image.exists():
-                uploaded_image.unlink()
+        remove_uploaded_product_image(product.get("imagePath", ""))
         flash("Product removed.", "success")
     return redirect(url_for("admin"))
 
@@ -244,13 +259,10 @@ def edit_product(product_id):
     old_image_path = product.get("imagePath", "")
     if image and image.filename:
         suffix = Path(secure_filename(image.filename)).suffix.lower()
-        new_filename = f"{uuid.uuid4().hex}{suffix}"
-        image.save(UPLOAD_DIR / new_filename)
-        product["imagePath"] = f"uploads/{new_filename}"
-        if old_image_path.startswith("uploads/"):
-            previous_image = UPLOAD_DIR / Path(old_image_path).name
-            if previous_image.exists():
-                previous_image.unlink()
+        new_filename = f"admin-{uuid.uuid4().hex}{suffix}"
+        image.save(PRODUCT_UPLOADS_DIR / new_filename)
+        product["imagePath"] = f"images/products/uploads/{new_filename}"
+        remove_uploaded_product_image(old_image_path)
 
     product.update({
         "title": name,

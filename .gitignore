@@ -2,5 +2,8 @@
 ecomates.db
 static/uploads/*
 !static/uploads/.gitkeep
+images/products/uploads/*
+!images/products/uploads/.gitkeep
+.DS_Store
 __pycache__/
 *.py[cod]
